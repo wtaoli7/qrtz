@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.entstudy.info.platform.qrtz.mapper.GxhAttendenceInfoMapper">
+
+	<select id="queryWxGxhAttendInfoFromV3" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		gxhatt.fid fid,
+		gxhatt.cfflag status,
+		gxhatt.fnumber
+		fNumber,
+		gxhatt.cfteachername
+		teacherName,
+		teacourse.cfteacherid
+		teacherId,
+		subject.fname_l2
+		subjectName,
+		course.cfname courseName,
+		person.fname_l2
+		managerName,
+		gxhattent.cfmanagerid managerId,
+		to_char(gxhatt.cfondate,'yyyy-mm-dd HH24:mi:ss') onDate,
+		to_char(gxhatt.cfstarttime,'yyyy-mm-dd HH24:mi:ss') startTime,
+		to_char(gxhatt.cfendtime,'yyyy-mm-dd HH24:mi:ss')
+		endTime,
+		gxhattent.cfstudentname studentName,
+		studentinfo.fnumber
+		studentNo,
+		gradeinfo.fname_l2 grade
+		from ct_v3k_attendgxh@kl_v3_test
+		gxhatt
+		left
+		join ct_v3k_attendgxhentry@kl_v3_test gxhattent
+		on gxhatt.fid
+		=
+		gxhattent.fparentid
+		left join ct_v3s_studentinfo@kl_v3_test
+		studentinfo
+		on gxhattent.cfstudentid = studentinfo.fid
+		left join
+		ct_v3c_courcomditygxh@kl_v3_test course
+		on gxhatt.cfcoursegxhid =
+		course.fid
+		left join t_org_ctrlunit@kl_v3_test orginfo
+		on
+		gxhatt.fcontrolunitid = orginfo.fid
+		left join
+		ct_v3b_gradedepartinfo@kl_v3_test gradeinfo
+		on gxhattent.cfgradeid =
+		gradeinfo.fid
+		left join t_bd_person@kl_v3_test person
+		on
+		gxhattent.cfmanagerid = person.fid
+		left join
+		ct_v3b_coucourse@kl_v3_test subject
+		on gxhatt.cfcoucourseid =
+		subject.fid
+		left join ct_v3t_teacourse@kl_v3_test teacourse
+		on
+		gxhatt.cfteachernumberid=teacourse.fid
+		<where>
+			<!-- 查询厦门个性化的数据 -->
+			orginfo.fid='vdad9pPGS6KcK7JUkvUXo8znrtQ=' and
+			to_char(gxhatt.cfondate, 'yyyy-mm-dd')=#{ondate,
+			jdbcType=VARCHAR}
+		</where>
+	</select>
+
+	<!-- 保存或更新 -->
+	<insert id="attendenceInfoSaveOrUpdate"
+		parameterType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		<selectKey keyProperty="count" resultType="int" order="BEFORE">
+			select count(*) as count from tab_gxh_attendence_info where fid =
+			#{fid,jdbcType=VARCHAR}
+		</selectKey>
+		<!-- 如果大于0则更新 -->
+		<if test="count>0">
+			update tab_gxh_attendence_info set
+			teacher_name=#{teacherName,jdbcType=VARCHAR},
+			teacher_id=#{teacherId,jdbcType=VARCHAR},
+			course_name=#{courseName,jdbcType=VARCHAR},
+			manager_name=#{managerName,jdbcType=VARCHAR},
+			manager_fid=#{managerId,jdbcType=VARCHAR},
+			course_date=to_date(#{onDate},'yyyy-mm-dd HH24:mi:ss'),
+			start_time=to_date(#{startTime},'yyyy-mm-dd HH24:mi:ss'),
+			end_time=to_date(#{endTime},'yyyy-mm-dd HH24:mi:ss'),
+			student_name=#{studentName,jdbcType=VARCHAR},
+			status=#{status,jdbcType=VARCHAR}
+			WHERE fid =
+			#{fid,jdbcType=VARCHAR}
+		</if>
+		<!-- 如果等于0则保存 -->
+		<if test="count==0">
+			insert into tab_gxh_attendence_info(
+			fid,
+			fnumber,
+			teacher_name,
+			teacher_id,
+			subject,
+			course_name,
+			manager_name，
+			manager_fid,
+			course_date,
+			start_time,
+			end_time,
+			student_name,
+			student_number,
+			grade,
+			status
+			) VALUES (
+			#{fid,jdbcType=VARCHAR},
+			#{fNumber,jdbcType=VARCHAR},
+			#{teacherName,jdbcType=VARCHAR},
+			#{teacherId,jdbcType=VARCHAR},
+			#{subjectName,jdbcType=VARCHAR},
+			#{courseName,jdbcType=VARCHAR},
+			#{managerName,jdbcType=VARCHAR},
+			#{managerId,jdbcType=VARCHAR},
+			to_date(#{onDate},'yyyy-mm-dd
+			HH24:mi:ss'),
+			to_date(#{startTime},'yyyy-mm-dd HH24:mi:ss'),
+			to_date(#{endTime},'yyyy-mm-dd HH24:mi:ss'),
+			#{studentName,jdbcType=VARCHAR},
+			#{studentNo,jdbcType=VARCHAR},
+			#{grade,jdbcType=VARCHAR},
+			#{status,jdbcType=VARCHAR}
+			)
+		</if>
+	</insert>
+
+	<sql id="selectColumn">
+		a.fid fid,
+		a.fnumber fNumber,
+		a.teacher_name teacherName,
+		a.teacher_id teacherId,
+		a.subject subjectName,
+		a.course_name courseName,
+		a.manager_name managerName,
+		a.manager_fid managerId,
+		to_char(a.start_time,'yyyy-mm-dd') onDate,
+		to_char(a.start_time,'yyyy-mm-dd HH24:mi:ss') startTime,
+		to_char(a.start_time,'HH24:mi') startTimeHour,
+		to_char(a.end_time,'yyyy-mm-dd HH24:mi:ss') endTime,
+		to_char(a.end_time,'HH24:mi') endTimeHour,
+		a.student_name
+		studentName,
+		a.student_number studentNo,
+		a.grade grade,
+		a.tea_sign_flag tea_sign_flag,
+		a.stu_sign_flag stu_sign_flag
+	</sql>
+
+	<select id="queryTeacherUnSignAttendenceInfo" parameterType="java.util.Map"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		<include refid="selectColumn"></include>
+		from
+		tab_gxh_attendence_info a
+		<where>
+			a.status='1' and
+<!-- 			a.TEA_SIGN_FLAG='N' and -->
+			a.teacher_id=#{teacherId,jdbcType=VARCHAR}
+			and to_char(a.end_time,
+			'yyyy-mm-dd')=#{onDate,
+			jdbcType=VARCHAR}
+			and
+			a.end_time &gt;=
+			to_date(#{startTime,jdbcType=VARCHAR},'yyyy-mm-dd
+			HH24:mi:ss')
+		</where>
+	</select>
+
+
+	<select id="queryStudentUnSignAttendenceInfo" parameterType="java.util.Map"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		<include refid="selectColumn"></include>
+		from
+		tab_gxh_attendence_info a
+		<where>
+			a.status='1' and
+<!-- 			a.STU_SIGN_FLAG='N' and -->
+			a.student_number=#{studentNo,jdbcType=VARCHAR}
+			and to_char(a.end_time,
+			'yyyy-mm-dd')=#{onDate,
+			jdbcType=VARCHAR}
+			and a.end_time &gt;=
+			to_date(#{startTime,jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss')
+		</where>
+	</select>
+	
+	<!-- 查询当天已签到未发送短信通知的排课信息 -->
+	<select id="queryAttendedUnNotifyInfos" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		<include refid="selectColumn"></include>
+		from
+		tab_gxh_attendence_info a
+		<where>
+			a.tea_sign_flag='Y'
+			and a.stu_sign_flag='Y'
+			and a.p_notify='N'
+			and
+			a.status='1'
+			and
+			to_char(a.start_time,'yyyy-mm-dd')
+			=#{onDate,jdbcType=VARCHAR}
+		</where>
+	</select>
+	
+	
+	<!-- 查询当天老师或者学生未签到的排课信息 -->
+	<select id="queryUnSignAttendedInfos" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		<include refid="selectColumn"></include>
+		from
+		tab_gxh_attendence_info a
+		<where>
+			(a.tea_sign_flag='N'
+			or a.stu_sign_flag='N')
+			and
+			a.status='1'
+			and
+			to_char(a.start_time,'yyyy-mm-dd')
+			=#{onDate,jdbcType=VARCHAR}
+		</where>
+		order by end_time asc
+	</select>
+
+	<!-- 查询已经开始上课，未完成考勤并且未通知学管师的排课 -->
+	<select id="queryUnAttendedUnNotifyInfos" parameterType="java.util.Map"
+		resultType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		select
+		<include refid="selectColumn"></include>
+		,b.fnumber managerNo
+		from
+		tab_gxh_attendence_info a
+		left join
+		t_bd_person@kl_v3_test b on a.manager_fid = b.fid
+		<where>
+			(a.tea_sign_flag='N'
+			or a.stu_sign_flag='N')
+			and
+			a.manager_notify='N'
+			and
+			a.status='1'
+			and
+			to_char(a.start_time,'yyyy-mm-dd')
+			=#{onDate,jdbcType=VARCHAR}
+			and
+			a.start_time
+			&lt;=to_date(#{currentTime,jdbcType=VARCHAR},'yyyy-mm-dd
+			HH24:mi:ss')
+		</where>
+		order by end_time asc
+	</select>
+
+	<update id="updateAttendenceInfoTeStatus"
+		parameterType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		update tab_gxh_attendence_info set
+		tea_sign_flag=#{tea_sign_flag,jdbcType=VARCHAR},
+		tea_sign_type=#{tea_sign_type,jdbcType=VARCHAR},
+		tea_sign_id=#{tea_sign_id,jdbcType=VARCHAR}
+		<where>
+			fid =
+			#{fid,jdbcType=VARCHAR}
+		</where>
+	</update>
+
+	<update id="updateAttendenceInfoStStatus"
+		parameterType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		update tab_gxh_attendence_info set
+		stu_sign_flag=#{stu_sign_flag,jdbcType=VARCHAR},
+		stu_sign_type=#{stu_sign_type,jdbcType=VARCHAR},
+		stu_sign_id=#{stu_sign_id,jdbcType=VARCHAR}
+		<where>
+			fid =
+			#{fid,jdbcType=VARCHAR}
+		</where>
+	</update>
+
+	<update id="updateAttendenceInfoParentNotify"
+		parameterType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		update tab_gxh_attendence_info set
+		p_notify='Y',
+		p_notfy_time=current_date
+		<where>
+			fid =
+			#{fid,jdbcType=VARCHAR}
+		</where>
+	</update>
+
+	<update id="updateAttendenceInfoManagerNotify"
+		parameterType="com.entstudy.info.platform.qrtz.model.GxhAttendenceInfo">
+		update tab_gxh_attendence_info set
+		manager_notify='Y',
+		manager_notify_time=current_date
+		<where>
+			fid =
+			#{fid,jdbcType=VARCHAR}
+		</where>
+	</update>
+
+
+
+</mapper>

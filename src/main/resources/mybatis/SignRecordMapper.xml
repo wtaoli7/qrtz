@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.entstudy.info.platform.qrtz.mapper.SignRecordMapper">
+
+	<select id="queryTeacherSignRecord" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.SignRecord">
+		select
+		id,
+		to_char(sign_time, 'yyyy-mm-dd HH24:mi:ss') signTime,
+		fnumber
+		fNumber,
+		role_type roleType,
+		handle_status handleStatus,
+		handle_msg
+		handleMsg,
+		handle_time handleTime
+		from tab_sign_record
+		<where>
+			role_type='TE'
+			and
+			sign_time &gt;= to_date(#{startTime,
+			jdbcType=VARCHAR},'yyyy-mm-dd
+			HH24:mi:ss')
+			and sign_time
+			&lt;=to_date(#{endTime,
+			jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss')
+			and
+			fnumber = #{teacherId,
+			jdbcType=VARCHAR}
+		</where>
+		order by sign_time desc
+	</select>
+
+	<select id="queryStudentSignRecord" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.SignRecord">
+		select
+		id,
+		to_char(sign_time, 'yyyy-mm-dd HH24:mi:ss') signTime,
+		fnumber
+		fNumber,
+		role_type roleType,
+		handle_status handleStatus,
+		handle_msg
+		handleMsg,
+		handle_time handleTime
+		from tab_sign_record
+		<where>
+			role_type='ST'
+			and
+			sign_time &gt;= to_date(#{startTime,
+			jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss')
+			and sign_time
+			&lt;=to_date(#{endTime,
+			jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss')
+			and
+			fnumber = #{studentNo,
+			jdbcType=VARCHAR}
+		</where>
+		order by sign_time desc
+	</select>
+
+</mapper>

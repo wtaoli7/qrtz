@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.entstudy.info.platform.qrtz.mapper.V3StudentInfoMapper">
+
+	<select id="queryV3StudentInfo" parameterType="String"
+		resultType="com.entstudy.info.platform.qrtz.model.V3StudentInfo">
+		select a.fid,
+		a.fnumber,
+		a.cfstudentname,
+		a.cfaddress,
+		a.cfgender,
+		a.cfcontactinfo
+		from ct_v3s_studentinfo@kl_v3_test a
+		<where>
+			fnumber=#{fNumber,
+			jdbcType=VARCHAR}
+		</where>
+	</select>
+
+</mapper>
